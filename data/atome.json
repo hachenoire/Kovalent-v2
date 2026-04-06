@@ -1,0 +1,13 @@
+{
+"atome":
+[
+{"symbole":"H", "nom":"Hydrogène", "valence":1, "couleur": [255, 255, 255], "rayon": 25},
+{"symbole":"C", "nom":"Carbone", "valence":4, "couleur": [50, 50, 50], "rayon": 40},
+{"symbole":"O", "nom":"Oxygène", "valence":2, "couleur": [255, 0, 0], "rayon": 40},
+{"symbole":"N", "nom":"Azote", "valence":3, "couleur": [0, 0, 255], "rayon": 40},
+{"symbole":"Cl", "nom":"Chlore", "valence":1, "couleur": [0, 200, 0], "rayon": 45},
+{"symbole":"F", "nom":"Fluor", "valence":1, "couleur": [200, 255, 100], "rayon": 40},
+{"symbole":"S", "nom":"Soufre", "valence":2, "couleur": [255, 255, 0], "rayon": 45},
+{"symbole":"P", "nom":"Phosphore", "valence":3, "couleur": [255, 165, 0], "rayon": 45}
+]
+}
