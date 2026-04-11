@@ -20,44 +20,46 @@ pip install -r requirements.txt
 Une fois le programme lancé, vous trouverez les instructions dans le jeu. Elles précisent le but du jeu, comment jouer, la progression et quelques atomes. Vous en découvrirez plus en jouant !
 
 ## Répertoire
-📂 **Kovalent**\
+```
+📂 Kovalent
 │
-├── 📂 **sources**\
+├── 📂 sources
 │   │
-│   └── main.py              - _Programme principal du jeu (à exécuter)_\
+│   └── main.py              -> Programme principal du jeu (à exécuter)
 │
-├── 📂 **data**\
+├── 📂 data
 │   │
-│   ├── 📂 **img**\
+│   ├── 📂 img
 │   │   │
-|   |   ├── 📂 **buttons**\
+|   |   ├── 📂 buttons
 │   │   │   │
-│   │   │   ├── next.png     - _Image du bouton de passage au niveau suivant_\
-│   │   │   └── restart.png  - _Image du bouton qui réinitialise le niveau_\
+│   │   │   ├── next.png     -> Image du bouton de passage au niveau suivant
+│   │   │   └── restart.png  -> Image du bouton qui réinitialise le niveau
 │   │   │
-│   │   ├── icon.png         - _Icone du jeu_\
-│   │   ├── lock.png         - _Image des niveaux bloqués_\
-│   │   └── title.png        - _Image du titre_\
+│   │   ├── icon.png         -> Icone du jeu
+│   │   ├── lock.png         -> Image des niveaux bloqués
+│   │   └── title.png        -> Image du titre
 │   │
-│   ├── 📂 **sound**\
+│   ├── 📂 sound
 │   │   │
-│   │   ├── btn-sfx.wav      - _Effet sonore _\
-│   │   ├── doom_music.wav   - _Musique pour le niveau 50_\
-│   │   ├── error-sfx.wav    - _Effet sonore (destruction d'un lien ou impossibilité d'en créer un)_\
-│   │   ├── link-sfx.wav     - _Effet sonore (lien entre 2 atomes)_\
-│   │   ├── music.wav        - _Musique principale du jeu_\
-│   │   └── win-sfx.wav      - _Effet sonore (résolution du niveau)_\
+│   │   ├── btn-sfx.wav      -> Effet sonore
+│   │   ├── doom_music.wav   -> Musique pour le niveau 50
+│   │   ├── error-sfx.wav    -> Effet sonore (destruction d'un lien ou impossibilité d'en créer un)
+│   │   ├── link-sfx.wav     -> Effet sonore (lien entre 2 atomes)
+│   │   ├── music.wav        -> Musique principale du jeu
+│   │   └── win-sfx.wav      -> Effet sonore (résolution du niveau)
 │   │
-│   ├── atome.json           - _Base de données des atomes du jeu_\
-│   ├── niveau.json          - _Base de données des niveaux du jeu_\
-│   └── progress.txt         - _Enregistrement du progrès dans le jeu_\
+│   ├── atome.json           -> Base de données des atomes du jeu
+│   ├── niveau.json          -> Base de données des niveaux du jeu
+│   └── progress.txt         -> Enregistrement du progrès dans le jeu
 │
-├── Affiche_Kovalent.png     - _Affiche du jeu_\
-├── presentation.md          - _Documentation détaillée_\
-├── requirements.txt         - _Dépendances_\
-├── Cahier_de_projet.odt     - _Cahier de projet_\
-├── license.txt              - _License_\
-└── README.md                - _Vous êtes ici_
+├── Affiche_Kovalent.png     -> Affiche du jeu
+├── presentation.md          -> Documentation détaillée
+├── requirements.txt         -> Dépendances
+├── Cahier_de_projet.odt     -> Cahier de projet
+├── license.txt              -> License
+└── README.md                -> Vous êtes ici
+```
 
 ## Contact
 Vous pouvez nous contacter, poser des questions, vous renseigner, à l'adresse suivante : <kimivictor@proton.me>
