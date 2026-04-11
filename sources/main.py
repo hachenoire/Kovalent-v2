@@ -8,9 +8,9 @@
 
 Bandeau d'informations - tenir à jour !
 
-Version : 13.0
+Version : 14.0
 
-Dernière édition : Victor, 6/04/2026, 16h23
+Dernière édition : Victor, 11/04/2026, 18h34
 
 
 ---------- COMMENTAIRE ----------
@@ -21,7 +21,7 @@ Mais en fait NON, car je vais encore l'améliorer !
 Un truc que je ne regrette pas : n'avoir pas fait les déplacements adaptatifs par rapport à
 la position de la souris : ça m'a pris un peu moins d'une heure ._.
 
-Ne pas demander comment je compte les versions...
+J'ai plus aucune idée de comment et pourquoi je compte les versions mais c'est pas grave...
 
 ---------- NOTES ----------
 
@@ -38,7 +38,7 @@ Ne pas demander comment je compte les versions...
     Penser aussi aux docstrings et aux commentaires
     Pas besoin de faire *SCALE pour du texte, la fonction le fait automatiquement
     Pas besoin de scale pour les boutons non plus
-    et je le fais pas en une seule fois du coup ça fait plein de versions
+    
     j'ai passé trop de temps sur la detect_win mais j'ai réussi UwU
 
 
@@ -69,6 +69,20 @@ Ne pas demander comment je compte les versions...
         - Musique de doom pour les niveaux 50 et 51 (lol)
         - Diverses améliorations et corrections
         - Ordre aléatoire des atomes au début
+    -> Version 13.1
+        - Affichage du fps
+        - Bouton pour le mode speedrun
+        - Chronomètre pour le mode speedrun
+    -> Version 13.2
+        - Bouton pour les infos du mode speedrun
+        - Sélection du niveau et modification du menu de jeu pour le mode speedrun
+        - Modification des crédits et du menu d'informations
+
+=> VERSION 14
+    -> Version 14.0
+        - Message de fin du speedrun et enregistrement du temps
+        - Record à battre
+        - Speedrun fonctionnel
     
 
 ==================== main.py ====================
@@ -126,7 +140,10 @@ for i in range(len(atoms_data)) :
 
 current_level = 0
 fenetre_basique = False
-skip_intro = True
+if progress > 3 :
+    skip_intro = True
+else :
+    skip_intro = False
 
 if skip_intro :
     tick = 200
@@ -176,6 +193,14 @@ win = False
 particles = []
 mouse_dx = 0 # distance de la souris au center de l'atome bougé
 mouse_dy = 0
+music_on = True
+speedrun_mode = False
+music_started = False
+sp_start = 0
+display_speedrun_infos = False
+final_time = None
+best_time = None
+new_best = False
 
 # ----- Initialisation de pygame et création de la fenêtre -----
 
@@ -229,10 +254,10 @@ pg.display.set_caption("Kovalent")
 
 # IMAGES
 title = pg.transform.scale(pg.image.load(os.sep.join(['..', "data", "img", "title.png"])), (800*SCALE, 100*SCALE))
-restart_btn = pg.transform.scale(pg.image.load(os.sep.join(['..', "data", "img", "restart.png"])), (50*SCALE, 50*SCALE))
+restart_btn = pg.transform.scale(pg.image.load(os.sep.join(['..', "data", "img", "buttons", "restart.png"])), (50*SCALE, 50*SCALE))
 lock_img = pg.transform.scale(pg.image.load(os.sep.join(['..', "data", "img", "lock.png"])), (40*SCALE, 45*SCALE))
 icon = pg.transform.scale(pg.image.load(os.sep.join(['..', "data", "img", "icon.png"])), (32, 32))
-btn_next = pg.transform.scale(pg.image.load(os.sep.join(['..', "data", "img", "next.png"])), (80*SCALE, 80*SCALE))
+btn_next = pg.transform.scale(pg.image.load(os.sep.join(['..', "data", "img", "buttons", "next.png"])), (80*SCALE, 80*SCALE))
 
 pg.display.set_icon(icon)
 
@@ -324,12 +349,17 @@ def render() -> None : # Par Victor
     else :
         if menu == "main" :
             main_menu()
+            print_txt("FPS : " + str(int(clock.get_fps())), (5, 5), 12, WHITE, False)
         elif menu == "level select" :
             level_select()
+            print_txt("FPS : " + str(int(clock.get_fps())), (5, 5), 12, WHITE, False)
         elif menu == "rules" :
             rules()
+            print_txt("FPS : " + str(int(clock.get_fps())), (5, 5), 12, WHITE, False)
         elif menu == "game":
             game()
+            print_txt("FPS : " + str(int(clock.get_fps())), (5, 785), 12, WHITE, False)
+        
 
 def create_particle_burst(p : list[dict]=[]) -> list[dict] :
     '''Crée un salve de particules, depuis les coins inférieurs'''
@@ -396,10 +426,14 @@ def intro() -> None : # Par Victor
 
 def main_menu() -> None : # Par Victor
     '''Affiche le menu principal'''
-    global menu, running, bg_type, page
+    global menu, running, bg_type, page, music_on, music_started
     
     surface.fill(DARK_GREY)
     background(GRAY)
+    
+    if not music_started :
+        music_started = True
+        game_music.play(-1)
     
     surface.blit(title, (200*SCALE, 100*SCALE))
     
@@ -415,7 +449,7 @@ def main_menu() -> None : # Par Victor
     
     print_txt("Arrière-plan :", (10, 750), 40, WHITE, False)
     if bg_type == "normal" :
-        if button((285, 745, 180, 50), "Normal", BLACK, 35, GREEN, merge_colors(GREEN, WHITE)) :
+        if button((285, 745, 180, 50), "Carrés", BLACK, 35, GREEN, merge_colors(GREEN, WHITE)) :
             bg_type = "circles"
     elif bg_type == "circles" :
         if button((285, 745, 180, 50), "Cercles", BLACK, 35, GREEN, merge_colors(GREEN, WHITE)) :
@@ -424,8 +458,18 @@ def main_menu() -> None : # Par Victor
         if button((285, 745, 180, 50), "Triangles", BLACK, 35, GREEN, merge_colors(GREEN, WHITE)) :
             bg_type = "disabled"
     elif bg_type == "disabled" :
-        if button((275, 745, 200, 50), "Désactivé", BLACK, 35, LIGHT_GREY, merge_colors(LIGHT_GREY, WHITE)) :
+        if button((279, 745, 192, 50), "Désactivé", BLACK, 35, LIGHT_GREY, merge_colors(LIGHT_GREY, WHITE)) :
             bg_type = "normal"
+    
+    print_txt("Musique :", (10, 690), 40, WHITE, False)
+    if music_on :
+        if button((220, 685, 70, 50), "On", BLACK, 35, GREEN, merge_colors(GREEN, WHITE)) :
+            music_on = False
+            game_music.stop()
+    else :
+        if button((220, 685, 70, 50), "Off", BLACK, 35, LIGHT_GREY, merge_colors(LIGHT_GREY, WHITE)) :
+            music_on = True
+            game_music.play(-1)
 
 
 def rules() -> None : # Par Victor
@@ -440,13 +484,13 @@ def rules() -> None : # Par Victor
     if page == 1 :
         print_txt("Informations sur le projet", (600, 100), 80, WHITE, True)
         print_txt("Règles du jeu", (600, 200), 50, WHITE, True)
-        
-        print_txt("Le but du jeu est de relier les atomes entre eux en", (150, 300), 30, WHITE, False)
-        print_txt("respectant leur nombre de valence (voir page 3). Vous devez former", (150, 350), 30, WHITE, False)
-        print_txt("une molécule avec ces atomes, avec une structure libre.", (150, 400), 30, WHITE, False)
-        print_txt("Il y a 50 niveaux, de plus en plus difficiles, à résoudre,", (150, 450), 30, WHITE, False)
-        print_txt("les difficultés allant de facile à impossible. Pour débloquer un", (150, 500), 30, WHITE, False)
-        print_txt("niveau et ainsi progresser, il faut d'abord finir le précédent.", (150, 550), 30, WHITE, False)
+        start_x = 150*SCALE
+        print_txt("Le but du jeu est de relier les atomes entre eux en", (start_x, 300), 30, WHITE, False)
+        print_txt("respectant leur nombre de valence (voir page 3). Vous devez former", (start_x, 350), 30, WHITE, False)
+        print_txt("une molécule avec ces atomes, avec une structure libre.", (start_x, 400), 30, WHITE, False)
+        print_txt("Il y a 50 niveaux, de plus en plus difficiles, à résoudre,", (start_x, 450), 30, WHITE, False)
+        print_txt("les difficultés allant de facile à impossible. Pour débloquer un", (start_x, 500), 30, WHITE, False)
+        print_txt("niveau et ainsi progresser, il faut d'abord finir le précédent.", (start_x, 550), 30, WHITE, False)
         
         if button((850, 650, 300, 100), "Suivant", BLACK, 60, LIGHT_GREY, WHITE) :
             page = 2
@@ -457,13 +501,13 @@ def rules() -> None : # Par Victor
     elif page == 2 :
         print_txt("Informations sur le projet", (600, 100), 80, WHITE, True)
         print_txt("Instructions", (600, 200), 50, WHITE, True)
-        
-        print_txt("Vous pouvez bouger les différents atomes au sein de l'aire de", (150, 300), 30, WHITE, False)
-        print_txt("jeu en les faisant glisser à l'aide de la souris.", (150, 350), 30, WHITE, False)
-        print_txt("Cliquez sur un atome pour le sélectionner, et faites un", (150, 400), 30, WHITE, False)
-        print_txt("clic droit sur un autre atome pour créer un lien entre les deux.", (150, 450), 30, WHITE, False)
-        print_txt("En cliquant plusieurs fois sur l'atome de destination, changez", (150, 500), 30, WHITE, False)
-        print_txt("la force du lien (double, triple...) ou supprimez-le.", (150, 550), 30, WHITE, False)
+        start_x = 150*SCALE
+        print_txt("Vous pouvez bouger les différents atomes au sein de l'aire de", (start_x, 300), 30, WHITE, False)
+        print_txt("jeu en les faisant glisser à l'aide de la souris.", (start_x, 350), 30, WHITE, False)
+        print_txt("Cliquez sur un atome pour le sélectionner, et faites un", (start_x, 400), 30, WHITE, False)
+        print_txt("clic droit sur un autre atome pour créer un lien entre les deux.", (start_x, 450), 30, WHITE, False)
+        print_txt("En cliquant plusieurs fois sur l'atome de destination, changez", (start_x, 500), 30, WHITE, False)
+        print_txt("la force du lien (double, triple...) ou supprimez-le.", (start_x, 550), 30, WHITE, False)
         
         if button((850, 650, 300, 100), "Suivant", BLACK, 60, LIGHT_GREY, WHITE) :
             page += 1
@@ -473,12 +517,12 @@ def rules() -> None : # Par Victor
     elif page == 3 :
         print_txt("Informations sur le projet", (600, 100), 80, WHITE, True)
         print_txt("Atomes", (600, 200), 50, WHITE, True)
-        
-        print_txt("Au cours du jeu, vous croiserez plusieurs atomes différents.", (150, 300), 30, WHITE, False)
-        print_txt("Chacun a un nombre de liaisons avec d'autres atomes à respecter.", (150, 350), 30, WHITE, False)
-        print_txt("Par exemple, l'atome de carbone (C) peut avoir 4 liaisons au total,", (150, 400), 30, WHITE, False)
-        print_txt("ou alors 2 liaisons doubles, ou encore 1 triple et 1 simple. L'atome", (150, 450), 30, WHITE, False)
-        print_txt("d'hydrogène (H), lui, ne peut en avoir qu'une seule.", (150, 500), 30, WHITE, False)
+        start_x = 125*SCALE
+        print_txt("Au cours du jeu, vous croiserez plusieurs atomes différents.", (start_x, 300), 30, WHITE, False)
+        print_txt("Chacun a un nombre de liaisons avec d'autres atomes à respecter.", (start_x, 350), 30, WHITE, False)
+        print_txt("Par exemple, l'atome de carbone (C) peut avoir 4 liaisons au total,", (start_x, 400), 30, WHITE, False)
+        print_txt("ou alors 2 liaisons doubles, ou encore 1 triple et 1 simple. L'atome", (start_x, 450), 30, WHITE, False)
+        print_txt("d'hydrogène (H), lui, ne peut en avoir qu'une seule.", (start_x, 500), 30, WHITE, False)
         
         if button((850, 650, 300, 100), "Suivant", BLACK, 60, LIGHT_GREY, WHITE) :
             page += 1
@@ -488,15 +532,15 @@ def rules() -> None : # Par Victor
     elif page == 4 :
         print_txt("Informations sur le projet", (600, 100), 80, WHITE, True)
         print_txt("Crédits", (600, 200), 50, WHITE, True)
-        
-        print_txt("Merci à notre duo de développeurs acharnés :", (150, 250), 30, WHITE, False)
-        print_txt('''Victor et Kimi (ou "KVTeam" comme on aime s'appeler)''', (150, 290), 30, WHITE, False)
-        print_txt("Projet réalisé en python, avec Pygame", (150, 330), 30, WHITE, False)
-        print_txt("Sons et musique : pixabay.com", (150, 370), 30, WHITE, False)
-        print_txt("Toutes les images du jeu ont été réalisés par Victor.", (150, 410), 30, WHITE, False)
-        print_txt("Remerciments à Fabien Rymland-Ergueta (professeur)", (150, 450), 30, WHITE, False)
-        print_txt("pour les conseils techniques", (150, 490), 30, WHITE, False)
-        print_txt("Et merci à VOUS, qui jouez à notre jeu :)", (150, 540), 35, WHITE, False)
+        start_x = 150*SCALE
+        print_txt("Merci à notre duo de développeurs acharnés :", (start_x, 250), 30, WHITE, False)
+        print_txt('''Victor et Kimi (ou "KVTeam" comme on aime s'appeler)''', (start_x, 290), 30, WHITE, False)
+        print_txt("Projet réalisé en python, avec Pygame", (start_x, 330), 30, WHITE, False)
+        print_txt("Sons et musique : pixabay.com + Mike Gordon (nv. 50)", (start_x, 370), 30, WHITE, False)
+        print_txt("Tous les assets visuels du jeu ont été réalisés par Victor.", (start_x, 410), 30, WHITE, False)
+        print_txt("Ceci est une version plus poussée du programme que l'original,", (start_x, 450), 30, (255, 100, 100), False)
+        print_txt("développée en solo par Victor, à partir de la version 10 du jeu.", (start_x, 490), 30, (255, 100, 100), False)
+        print_txt("Merci à notre prof, et merci à VOUS, qui jouez à notre jeu :)", (start_x, 540), 32, GREEN, False)
         
         if button((50, 650, 300, 100), "Précédent", BLACK, 50, LIGHT_GREY, WHITE) :
             page -= 1
@@ -520,17 +564,51 @@ def rules() -> None : # Par Victor
 
 def level_select() : # Victor
     '''Affiche le menu de sélection du niveau à jouer'''
-    global menu, current_level, difficulty, level_color, selected_atom, atoms, has_won, win
+    global menu, current_level, difficulty, level_color, selected_atom, atoms, has_won, win, speedrun_mode, sp_start, display_speedrun_infos
     
     surface.fill(DARK_GREY)
     background(GRAY)
     
     print_txt("Sélectionnez un niveau", (600, 80), 70, WHITE, True)
 
-    if button((50, 650, 300, 100), "Retour", BLACK, 60, LIGHT_GREY, WHITE):
+    if button((20, 680, 300, 100), "Retour", BLACK, 60, LIGHT_GREY, WHITE):
         menu = "main"
+    
+    if not display_speedrun_infos :
+        print_txt("Mode speedrun :", (700, 725), 40, WHITE, False)
+        if speedrun_mode :
+            if button((1050, 720, 70, 50), "On", BLACK, 35, GREEN, merge_colors(GREEN, WHITE)) :
+                speedrun_mode = False
+        else :
+            if button((1050, 720, 70, 50), "Off", BLACK, 35, LIGHT_GREY, merge_colors(LIGHT_GREY, WHITE)) :
+                speedrun_mode = True
+        if button((1140, 720, 30, 30), "?", BLACK, 30, LIGHT_GREY, merge_colors(LIGHT_GREY, WHITE)) :
+            display_speedrun_infos = True
+        
+        if best_time != None :
+            minutes, seconds, cs  = str(convert_time(best_time)[0]), str(convert_time(best_time)[1]), str(convert_time(best_time)[2])
+        
+            if len(seconds) == 1 and minutes != "0" :
+                seconds = "0" + seconds
+            if len(cs) == 1 :
+                cs = "0" + cs
+            
+            if minutes == "0" :
+                print_txt("Meilleur temps : " + seconds + "." + cs, (700, 765), 30, WHITE, False)
+            else :
+                print_txt("Meilleur temps : " + minutes + ":" + seconds + "." + cs, (700, 765), 30, WHITE, False)
+    else :
+        print_txt("Le mode speedrun chronomètre votre vitesse de résolution", (400, 700), 25, WHITE, False)
+        print_txt("des niveaux. Le but est de résoudre du niveau 1 au 40 le", (400, 725), 25, WHITE, False)
+        print_txt("plus vite possible pour battre votre record !", (400, 750), 25, WHITE, False)
+        if button((1140, 720, 30, 30), "?", BLACK, 30, GREEN, merge_colors(GREEN, WHITE)) :
+            display_speedrun_infos = False
 
-
+    if speedrun_mode :
+        temp_locked = 2
+    else :
+        temp_locked = locked
+    
     num = 1
     for l in range(5):
         for i in range(10):
@@ -550,7 +628,7 @@ def level_select() : # Victor
             else :
                 col = (0, 0, 150)
 
-            if num < locked :
+            if num < temp_locked :
                 b = button((x_pos, y_pos, 60, 60), str(num), BLACK, 30, merge_colors(col, LIGHT_GREY), merge_colors(merge_colors(col, LIGHT_GREY), WHITE))
             else :
                 button((x_pos, y_pos, 60, 60), "", BLACK, 30, merge_colors(col, BLACK), merge_colors(col, BLACK))
@@ -565,6 +643,10 @@ def level_select() : # Victor
                 has_won = False
                 win = False
                 selected_atom = 0
+                new_best = False
+                
+                if speedrun_mode :
+                    sp_start = pg.time.get_ticks()
                                 
                 if current_level <= 10 :
                     difficulty = "Facile"
@@ -585,7 +667,7 @@ def level_select() : # Victor
                     difficulty = "Impossible"
                     level_color = BLACK
                 
-                if current_level >= 50 :
+                if current_level >= 50 and music_on :
                     game_music.stop()
                     doom_music.play(-1)
                 
@@ -594,7 +676,7 @@ def level_select() : # Victor
 
 def game(): # Kimi et Victor
     '''Affiche et gère le jeu'''
-    global menu, selected_atom, moving, moved_atom_id, current_level, atoms, has_won, vict_start_tick, locked, win, particles, mouse_dx, mouse_dy
+    global menu, selected_atom, moving, moved_atom_id, current_level, atoms, has_won, vict_start_tick, locked, win, particles, mouse_dx, mouse_dy, final_time, best_time, new_best
     
     surface.fill(DARK_GREY)
     background(merge_colors(level_color, DARK_GREY)) # kimi
@@ -608,23 +690,38 @@ def game(): # Kimi et Victor
             
             win_sfx.play()
             
+            if speedrun_mode and current_level == 40 :
+                final_time = pg.time.get_ticks() - sp_start
+                if best_time == None :
+                    best_time = final_time
+                    new_best = True
+                elif final_time < best_time :
+                    best_time = final_time
+                    new_best = True
+                else :
+                    new_best = False
+            
             if current_level == locked-1 :
                 locked += 1
                 set_progress(locked)
         has_won = True
         
-    
-    if button((15, 15, 190, 30), "Menu", BLACK, 20, LIGHT_GREY, WHITE):
+    if speedrun_mode and current_level < 41 and not (current_level == 40 and has_won) :
+        menu_btn_txt = "Abandonner"
+    else :
+        menu_btn_txt = "Menu"
+        
+    if button((15, 15, 190, 30), menu_btn_txt, BLACK, 20, LIGHT_GREY, WHITE):
         menu = "level select"
         moving = False # Sécu
         has_won = False
         win = False
-        if current_level >= 50 :
+        if current_level >= 50 and music_on :
             doom_music.stop()
             game_music.play(-1)
 
     
-    if current_level < locked-1 and current_level<50:#kimi
+    if current_level < locked-1 and current_level<50 and not speedrun_mode :#kimi
         if button((15, 45, 190, 30), "Niveau suivant", BLACK, 20, LIGHT_GREY, WHITE) :
             current_level += 1
             atoms = create_atoms(current_level)
@@ -633,7 +730,8 @@ def game(): # Kimi et Victor
             moved_atom_id = None
             has_won = False
             win = False
-            if current_level >= 50 :
+            new_best = False
+            if current_level >= 50 and music_on :
                 game_music.stop()
                 doom_music.play(-1)
 
@@ -647,12 +745,13 @@ def game(): # Kimi et Victor
             moved_atom_id = None
             has_won = False
             win = False
+            new_best = False
             if current_level >= 50 :
                 game_music.stop()
                 doom_music.play(-1)
 
             
-    elif current_level == locked-1 and current_level < 50: #kimi
+    elif current_level == locked-1 and current_level < 50 and not speedrun_mode : #kimi
         if button((15, 45, 190, 30), "Niveau suivant", BLACK, 20, DARK_GREY, DARK_GREY) :
             moving = False
     
@@ -681,57 +780,104 @@ def game(): # Kimi et Victor
     particles = evolve_particles(particles)
     
     if has_won :
-        #print(sqrt(sin((time_difference)/80*pi))*80)
-        time_difference = tick - vict_start_tick
-        if time_difference < 40 :
-            print_txt("Niveau résolu !", (600, 300), sqrt(sin((time_difference)/80*pi))*80, WHITE, True)
-            
-        elif time_difference < 250 :
-            print_txt("Niveau résolu !", (600, 300), 80, WHITE, True)
-            if current_level < 51 :
-                if button((540, 540, 120, 120), "", BLACK, 20, LIGHT_GREY, WHITE) :
-                    current_level += 1
-                    atoms = create_atoms(current_level)
-                    selected_atom = 0
-                    moving = False
-                    moved_atom_id = None
-                    has_won = False
-                    win = False
-                    if current_level >= 50 :
-                        game_music.stop()
-                        doom_music.play(-1)
-                surface.blit(btn_next, (560*SCALE, 560*SCALE))
-            
-        elif time_difference < 275 :
-            print_txt("Niveau résolu !", (600, 300), 80-((time_difference - 250)/25)*80, WHITE, True)
-            if current_level < 51 :
-                if button((540+((time_difference - 250)/25)*500, 540+((time_difference - 250)/25)*100, 120, 120), "", BLACK, 20, LIGHT_GREY, WHITE) :
-                    current_level += 1
-                    atoms = create_atoms(current_level)
-                    selected_atom = 0
-                    moving = False
-                    moved_atom_id = None
-                    has_won = False
-                    win = False
-                    if current_level >= 50 :
-                        game_music.stop()
-                        doom_music.play(-1)
-                surface.blit(btn_next, (((540+((time_difference - 250)/25)*500)+20)*SCALE, ((540+((time_difference - 250)/25)*100)+20)*SCALE))
-            
+        if speedrun_mode and current_level == 40 :
+            time_difference = tick - vict_start_tick
+            if time_difference < 40 :
+                print_txt("Speedrun terminé !", (600, 300), sqrt(sin((time_difference)/80*pi))*80, GREEN, True)
+            else :
+                print_txt("Speedrun terminé !", (600, 300), 80, GREEN, True)
+                minutes, seconds, cs  = str(convert_time(final_time)[0]), str(convert_time(final_time)[1]), str(convert_time(final_time)[2])
+        
+                if len(seconds) == 1 and minutes != "0" :
+                    seconds = "0" + seconds
+                if len(cs) == 1 :
+                    cs = "0" + cs
+                
+                if minutes == "0" :
+                    print_txt("Temps final : " + seconds + "." + cs, (600, 500), 60, GREEN, True)
+                else :
+                    print_txt("Temps final : " + minutes + ":" + seconds + "." + cs, (600, 500), 60, GREEN, True)
+                
+                if new_best :
+                    print_txt("Nouveau record !", (600, 600), 50, GREEN, True)
+                else :
+                    minutes, seconds, cs  = str(convert_time(best_time)[0]), str(convert_time(best_time)[1]), str(convert_time(best_time)[2])
+        
+                    if len(seconds) == 1 and minutes != "0" :
+                        seconds = "0" + seconds
+                    if len(cs) == 1 :
+                        cs = "0" + cs
+                    
+                    if minutes == "0" :
+                        print_txt("Meilleur temps : " + seconds + "." + cs, (600, 600), 50, GREEN, True)
+                    else :
+                        print_txt("Meilleur temps : " + minutes + ":" + seconds + "." + cs, (600, 600), 50, GREEN, True)
+                
         else :
-            if current_level < 51 :
-                if button((1040, 640, 120, 120), "", BLACK, 20, LIGHT_GREY, WHITE) :
-                    current_level += 1
-                    atoms = create_atoms(current_level)
-                    selected_atom = 0
-                    moving = False
-                    moved_atom_id = None
-                    has_won = False
-                    win = False
-                    if current_level >= 50 :
-                        game_music.stop()
-                        doom_music.play(-1)
-                surface.blit(btn_next, (1060*SCALE, 660*SCALE))
+            #print(sqrt(sin((time_difference)/80*pi))*80)
+            time_difference = tick - vict_start_tick
+            if time_difference < 40 :
+                print_txt("Niveau résolu !", (600, 300), sqrt(sin((time_difference)/80*pi))*80, WHITE, True)
+                if speedrun_mode:
+                    if button((540, 540, 120, 120), "", BLACK, 20, LIGHT_GREY, WHITE) :
+                        current_level += 1
+                        atoms = create_atoms(current_level)
+                        selected_atom = 0
+                        moving = False
+                        moved_atom_id = None
+                        has_won = False
+                        win = False
+                        if current_level >= 50 and music_on :
+                            game_music.stop()
+                            doom_music.play(-1)
+                    surface.blit(btn_next, (560*SCALE, 560*SCALE))
+                
+            elif time_difference < 250 :
+                print_txt("Niveau résolu !", (600, 300), 80, WHITE, True)
+                if current_level < 51 :
+                    if button((540, 540, 120, 120), "", BLACK, 20, LIGHT_GREY, WHITE) :
+                        current_level += 1
+                        atoms = create_atoms(current_level)
+                        selected_atom = 0
+                        moving = False
+                        moved_atom_id = None
+                        has_won = False
+                        win = False
+                        if current_level >= 50 and music_on :
+                            game_music.stop()
+                            doom_music.play(-1)
+                    surface.blit(btn_next, (560*SCALE, 560*SCALE))
+                
+            elif time_difference < 275 :
+                print_txt("Niveau résolu !", (600, 300), 80-((time_difference - 250)/25)*80, WHITE, True)
+                if current_level < 51 :
+                    if button((540+((time_difference - 250)/25)*500, 540+((time_difference - 250)/25)*100, 120, 120), "", BLACK, 20, LIGHT_GREY, WHITE) :
+                        current_level += 1
+                        atoms = create_atoms(current_level)
+                        selected_atom = 0
+                        moving = False
+                        moved_atom_id = None
+                        has_won = False
+                        win = False
+                        if current_level >= 50 and music_on :
+                            game_music.stop()
+                            doom_music.play(-1)
+                    surface.blit(btn_next, (((540+((time_difference - 250)/25)*500)+20)*SCALE, ((540+((time_difference - 250)/25)*100)+20)*SCALE))
+                
+            else :
+                if current_level < 51 :
+                    if button((1040, 640, 120, 120), "", BLACK, 20, LIGHT_GREY, WHITE) :
+                        current_level += 1
+                        atoms = create_atoms(current_level)
+                        selected_atom = 0
+                        moving = False
+                        moved_atom_id = None
+                        has_won = False
+                        win = False
+                        if current_level >= 50 and music_on :
+                            game_music.stop()
+                            doom_music.play(-1)
+                    surface.blit(btn_next, (1060*SCALE, 660*SCALE))
     
 
     if click(): # Si on clique
@@ -764,12 +910,40 @@ def game(): # Kimi et Victor
                     atome["pos"] = (atome["pos"][0], 740)
     
     
-    create_links()  
+    create_links()
+    
+    if speedrun_mode and not (current_level == 40 and has_won) :
+        
+        sp_time = pg.time.get_ticks() - sp_start
+        minutes, seconds, cs  = str(convert_time(sp_time)[0]), str(convert_time(sp_time)[1]), str(convert_time(sp_time)[2])
+        
+        if len(seconds) == 1 and minutes != "0" :
+            seconds = "0" + seconds
+        if len(cs) == 1 :
+            cs = "0" + cs
+        
+        if minutes == "0" :
+            pg.draw.rect(surface, BLACK, (1050*SCALE, 735*SCALE, 300*SCALE, 100*SCALE))
+            print_txt("   " + seconds, (1030, 745), 50, GREEN, False)
+            print_txt("." + cs, (1030 + create_text("   " + seconds, 50).get_width(), 760), 30, GREEN, False)
+        else :
+            pg.draw.rect(surface, BLACK, (995*SCALE, 735*SCALE, 300*SCALE, 100*SCALE))
+            print_txt(minutes + ":" + seconds, (1010, 745), 50, GREEN, False)
+            print_txt("." + cs, (1010 + create_text(minutes + ":" + seconds, 50).get_width(), 760), 30, GREEN, False)
+        
+        #print(((sp_time/60000)-minutes))
     
     #print(mouse_pressed)
     #print_txt("Debug : mousepos=" + str(pg.mouse.get_pos()) + ", win=" + str(detect_win()), (600, 750), 30, WHITE, True)
 
 
+def convert_time(time) -> (int, int, int):
+    '''Convertit des millisecondes en minutes/secondes/centièmes'''
+    minutes = int(time/60000)
+    seconds = int(((time/60000)-int(minutes))*60)
+    cs = int((((time/60000)-int(minutes))*60-int(seconds))*100)
+
+    return minutes, seconds, cs
 
 def create_links() -> None:#kimi
     """gère les liaison entre atomes"""
@@ -1137,6 +1311,8 @@ def background(color:tuple) -> None : # Par Victor amélioré par Kimi
                 pg.draw.lines(surface, (r,g,b), True, [scaling(pt1), scaling(pt2), scaling(pt3)], int(5*SCALE))
 
 
+
+
    
 
 
@@ -1147,8 +1323,6 @@ def background(color:tuple) -> None : # Par Victor amélioré par Kimi
 menu = "main"
 
 clock = pg.time.Clock()
-
-game_music.play(-1)
 
 running = True
 
@@ -1173,6 +1347,7 @@ while running :
     
     
     tick += 1 # + 1 ticks par frame (60 par seconde)
+
     clock.tick(60) # Met le FPS à 60
     
 
@@ -1185,6 +1360,7 @@ pg.quit()
 print("----------------------------------------")
 
 print("Merci d'avoir joué à notre jeu ! À bientôt pour plus de chimie ;)")
+
 
 
 
