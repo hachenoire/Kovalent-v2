@@ -21,25 +21,37 @@ Une fois le programme lancé, vous trouverez les instructions dans le jeu. Elles
 
 ## Répertoire
 📂 **Kovalent**\
+│
 ├── 📂 **sources**\
+│   │
 │   └── main.py              - _Programme principal du jeu (à exécuter)_\
+│
 ├── 📂 **data**\
+│   │
 │   ├── 📂 **img**\
+│   │   │
+|   |   ├── 📂 **buttons**\
+│   │   │   │
+│   │   │   ├── next.png     - _Image du bouton de passage au niveau suivant_\
+│   │   │   └── restart.png  - _Image du bouton qui réinitialise le niveau_\
+│   │   │
 │   │   ├── icon.png         - _Icone du jeu_\
 │   │   ├── lock.png         - _Image des niveaux bloqués_\
-│   │   ├── next.png         - _Image du bouton de passage au niveau suivant_\
-│   │   ├── restart.png      - _Image du bouton qui réinitialise le niveau_\
 │   │   └── title.png        - _Image du titre_\
+│   │
 │   ├── 📂 **sound**\
+│   │   │
 │   │   ├── btn-sfx.wav      - _Effet sonore _\
 │   │   ├── doom_music.wav   - _Musique pour le niveau 50_\
 │   │   ├── error-sfx.wav    - _Effet sonore (destruction d'un lien ou impossibilité d'en créer un)_\
 │   │   ├── link-sfx.wav     - _Effet sonore (lien entre 2 atomes)_\
 │   │   ├── music.wav        - _Musique principale du jeu_\
 │   │   └── win-sfx.wav      - _Effet sonore (résolution du niveau)_\
+│   │
 │   ├── atome.json           - _Base de données des atomes du jeu_\
 │   ├── niveau.json          - _Base de données des niveaux du jeu_\
 │   └── progress.txt         - _Enregistrement du progrès dans le jeu_\
+│
 ├── Affiche_Kovalent.png     - _Affiche du jeu_\
 ├── presentation.md          - _Documentation détaillée_\
 ├── requirements.txt         - _Dépendances_\
