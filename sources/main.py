@@ -270,7 +270,7 @@ btn_sfx = pg.mixer.Sound(os.sep.join(['..', 'data', 'sound', "btn-sfx.wav"]))
 link_sfx = pg.mixer.Sound(os.sep.join(['..', 'data', 'sound', "link-sfx.wav"]))
 error_sfx = pg.mixer.Sound(os.sep.join(['..', 'data', 'sound', "error-sfx.wav"]))
 game_music = pg.mixer.Sound(os.sep.join(['..', 'data', 'sound', "music.wav"]))
-doom_music = pg.mixer.Sound(os.sep.join(['..', 'data', 'sound', "doom_music.wav"]))
+doom_music = pg.mixer.Sound(os.sep.join(['..', 'data', 'sound', "music.wav"]))
 
 
 # ----- Fonts -----
