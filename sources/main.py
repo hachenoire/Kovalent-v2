@@ -99,7 +99,7 @@ import pygame as pg
 import json
 from math import *
 import os
-#from screeninfo import *
+from screeninfo import *
 from random import *
 
 # ----- Fichiers importés -----
