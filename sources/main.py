@@ -10,7 +10,7 @@ Bandeau d'informations - tenir à jour !
 
 Version : 14.1
 
-Dernière édition : Victor, 24/04/2026, 12h55
+Dernière édition : Victor, 24/04/2026, 18h55
 
 
 ---------- COMMENTAIRE ----------
@@ -22,6 +22,8 @@ Un truc que je ne regrette pas : n'avoir pas fait les déplacements adaptatifs p
 la position de la souris : ça m'a pris un peu moins d'une heure ._.
 
 J'ai plus aucune idée de comment et pourquoi je compte les versions mais c'est pas grave...
+
+Go me lancer dans un truc indépêtrable de niveaux custom \(^v^)/
 
 ---------- NOTES ----------
 
@@ -86,6 +88,7 @@ J'ai plus aucune idée de comment et pourquoi je compte les versions mais c'est 
         -> Version 14.0.1 : correction d'un bug avec les particules
     -> Version 14.1
         - Nouveau menu pour les niveaux custom
+        - Argument pour faire des boutons sans sfx (boutons bloqués)
     
 
 ==================== main.py ====================
@@ -650,7 +653,7 @@ def level_select() : # Victor
             if num < temp_locked :
                 b = button((x_pos, y_pos, 60, 60), str(num), BLACK, 30, merge_colors(col, LIGHT_GREY), merge_colors(merge_colors(col, LIGHT_GREY), WHITE))
             else :
-                button((x_pos, y_pos, 60, 60), "", BLACK, 30, merge_colors(col, BLACK), merge_colors(col, BLACK))
+                button((x_pos, y_pos, 60, 60), "", BLACK, 30, merge_colors(col, BLACK), merge_colors(col, BLACK), False)
                 surface.blit(lock_img, ((x_pos+10)*SCALE, (y_pos+7.5)*SCALE))
                 b = False
             
@@ -1143,7 +1146,7 @@ def find_in_dlist(t : list[dict], key : str, value : object) -> dict : # Par Vic
     return r
 
 
-def button(rect : tuple, text : str, text_color : tuple, text_size : int, color : tuple, color2 : tuple) -> bool : # Par Victor
+def button(rect : tuple, text : str, text_color : tuple, text_size : int, color : tuple, color2 : tuple, play_sfx : bool=True) -> bool : # Par Victor
     '''Affiche un bouton à rect(gauche, haut, longueur, hauteur),
     du texte, avec couleur et taille, et sa couleur, et renvoie True si il est cliqué.
     Il passe à la couleur de color2 (optionnel) quand la souris est dessus'''
@@ -1163,7 +1166,8 @@ def button(rect : tuple, text : str, text_color : tuple, text_size : int, color 
         print_txt(text, ((rleft + (rwidth/2)), (rtop + (rheight/2))), text_size, text_color, True)
         if click() : # click gauche
             #print("truc")
-            btn_sfx.play()
+            if play_sfx :
+                btn_sfx.play()
             return True
         else :
             return False
@@ -1380,16 +1384,6 @@ pg.quit()
 print("----------------------------------------")
 
 print("Merci d'avoir joué à notre jeu ! À bientôt pour plus de chimie ;)")
-
-
-
-
-
-
-
-
-
-
 
 
 
