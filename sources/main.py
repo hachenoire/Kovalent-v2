@@ -8,9 +8,9 @@
 
 Bandeau d'informations - tenir à jour !
 
-Version : 14.0.1
+Version : 14.1
 
-Dernière édition : Victor, 23/04/2026, 17h26
+Dernière édition : Victor, 24/04/2026, 12h55
 
 
 ---------- COMMENTAIRE ----------
@@ -84,6 +84,8 @@ J'ai plus aucune idée de comment et pourquoi je compte les versions mais c'est 
         - Record à battre
         - Speedrun fonctionnel
         -> Version 14.0.1 : correction d'un bug avec les particules
+    -> Version 14.1
+        - Nouveau menu pour les niveaux custom
     
 
 ==================== main.py ====================
@@ -360,6 +362,8 @@ def render() -> None : # Par Victor
         elif menu == "game":
             game()
             print_txt("FPS : " + str(int(clock.get_fps())), (5, 785), 12, WHITE, False)
+        elif menu == "my_levels" :
+            my_levels()
         
 
 def create_particle_burst(p : list[dict]=[]) -> list[dict] :
@@ -472,6 +476,17 @@ def main_menu() -> None : # Par Victor
             music_on = True
             game_music.play(-1)
 
+def my_levels() -> None :
+    global menu
+    
+    surface.fill(DARK_GREY)
+    background(GRAY)
+    
+    print_txt("Rien ici pour l'instant... :/", (600, 300), 40, WHITE, True)
+    
+    if button((50, 650, 300, 100), "Retour", BLACK, 60, LIGHT_GREY, WHITE) :
+            menu = "level select"
+
 
 def rules() -> None : # Par Victor
     '''Affiche le menu des règles du jeu'''
@@ -572,16 +587,19 @@ def level_select() : # Victor
     
     print_txt("Sélectionnez un niveau", (600, 80), 70, WHITE, True)
 
-    if button((20, 680, 300, 100), "Retour", BLACK, 60, LIGHT_GREY, WHITE):
+    if button((20, 680, 250, 100), "Menu", BLACK, 60, LIGHT_GREY, WHITE):
         menu = "main"
     
     if not display_speedrun_infos :
-        print_txt("Mode speedrun :", (700, 725), 40, WHITE, False)
+        if button((300, 680, 400, 100), "Mes niveaux", BLACK, 60, LIGHT_GREY, WHITE):
+            menu = "my_levels"
+            
+        print_txt("Mode speedrun :", (720, 715), 40, WHITE, False)
         if speedrun_mode :
-            if button((1050, 720, 70, 50), "On", BLACK, 35, GREEN, merge_colors(GREEN, WHITE)) :
+            if button((1055, 710, 70, 50), "On", BLACK, 35, GREEN, merge_colors(GREEN, WHITE)) :
                 speedrun_mode = False
         else :
-            if button((1050, 720, 70, 50), "Off", BLACK, 35, LIGHT_GREY, merge_colors(LIGHT_GREY, WHITE)) :
+            if button((1055, 710, 70, 50), "Off", BLACK, 35, LIGHT_GREY, merge_colors(LIGHT_GREY, WHITE)) :
                 speedrun_mode = True
         if button((1140, 720, 30, 30), "?", BLACK, 30, LIGHT_GREY, merge_colors(LIGHT_GREY, WHITE)) :
             display_speedrun_infos = True
@@ -595,13 +613,13 @@ def level_select() : # Victor
                 cs = "0" + cs
             
             if minutes == "0" :
-                print_txt("Meilleur temps : " + seconds + "." + cs, (700, 765), 30, WHITE, False)
+                print_txt("Meilleur temps : " + seconds + "." + cs, (700, 760), 30, WHITE, False)
             else :
-                print_txt("Meilleur temps : " + minutes + ":" + seconds + "." + cs, (700, 765), 30, WHITE, False)
+                print_txt("Meilleur temps : " + minutes + ":" + seconds + "." + cs, (700, 760), 30, WHITE, False)
     else :
-        print_txt("Le mode speedrun chronomètre votre vitesse de résolution", (400, 700), 25, WHITE, False)
-        print_txt("des niveaux. Le but est de résoudre du niveau 1 au 40 le", (400, 725), 25, WHITE, False)
-        print_txt("plus vite possible pour battre votre record !", (400, 750), 25, WHITE, False)
+        print_txt("Le mode speedrun chronomètre votre vitesse de résolution", (400, 695), 25, WHITE, False)
+        print_txt("des niveaux. Le but est de résoudre du niveau 1 au 40 le", (400, 720), 25, WHITE, False)
+        print_txt("plus vite possible pour battre votre record !", (400, 745), 25, WHITE, False)
         if button((1140, 720, 30, 30), "?", BLACK, 30, GREEN, merge_colors(GREEN, WHITE)) :
             display_speedrun_infos = False
 
